@@ -285,7 +285,7 @@ struct NoInventarioRPG{
     int quantidade;
     NoInventarioRPG* proximo;
 };
-
+// A pilha guarda as pocoes: a ultima coletada e a primeira usada.
 struct NoPocaoRPG{
     string nome;
     int cura;
@@ -325,7 +325,51 @@ struct JogadorRPG{
         corpo.setPosition({245.0f, 120.0f});
 };
 
+// Busca recursiva na lista encadeada do inventario
+NoInventarioRPG* buscarItemRecursivoRPG(NoInventarioRPG* no, const string& nome) {
+    if (!no || no->nome == nome) return no;
+    return buscarItemRecursivoRPG(no->proximo, nome);
+}
 
+void adicionarAoInventarioRPG(JogadorRPG& jogador, const string& nome, int atributo) {
+    NoInventarioRPG* item = buscarItemRecursivoRPG(jogador.inventario, nome);
+    if (item) {
+    ++item->quantidade;
+        return;
+    }
+    jogador.inventario = new NoInventarioRPG{ nome, atributo, 1, jogador.inventario };
+}
+
+void removerUmItemInventarioRPG(JogadorRPG& jogador, const string& nome) {
+    NoInventarioRPG* atual = jogador.inventario;
+    NoInventarioRPG* anterior = nullptr;
+    while (atual) {
+    if (atual->nome == nome) {
+     if (atual->quantidade > 1) --atual->quantidade;
+else {
+    if (anterior) anterior->proximo = atual->proximo;
+else jogador.inventario = atual->proximo;
+delete atual;
+}
+    return;
+}
+anterior = atual;
+atual = atual->proximo;
+}
+}
+// Selection Sort: organiza os itens pelo nome.
+void ordenarInventarioRPG(NoInventarioRPG* inicio) {
+    for (NoInventarioRPG* a = inicio; a; a = a->proximo) {
+        NoInventarioRPG* menor = a;
+        for (NoInventarioRPG* b = a->proximo; b; b = b->proximo)
+            if (b->nome < menor->nome) menor = b;
+        if (menor != a) {
+            swap(a->nome, menor->nome);
+            swap(a->atributo, menor->atributo);
+            swap(a->quantidade, menor->quantidade);
+        }
+    }
+}
 
 
 
@@ -355,19 +399,6 @@ struct JogadorRPG{
 int main() {
 
     setlocale(LC_ALL, "pt_BR.UTF-8");
-// ==================================================
-// JOGADOR
-// ==================================================
-
-
-
-
-
-
-
-
-
-
 
     // ----------------------------------------------
     // CRIACAO DAS SALAS
