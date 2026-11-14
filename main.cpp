@@ -374,7 +374,9 @@ void adicionarAoInventarioRPG(
     jogador.inventario = novoItem;
 }
 
-// Remove uma unidade de um item do inventario.
+// Remove uma unidade de um item do inventário.
+// Parâmetros: jogador e nome do item.
+// Retorno: não possui.
 void removerUmItemInventarioRPG(
     JogadorRPG& jogador,
     const string& nome
@@ -382,26 +384,21 @@ void removerUmItemInventarioRPG(
     NoInventarioRPG* atual = jogador.inventario;
     NoInventarioRPG* anterior = nullptr;
 
-    while (atual != nullptr) {
-        if (atual->nome == nome) {
-        if (atual->quantidade > 1) {
-    atual->quantidade--;
-}
- else {
-if (anterior == nullptr) {
-    jogador.inventario = atual->proximo;
-} 
-else{
-anterior->proximo = atual->proximo;
- }
+    while (atual != nullptr && atual->nome != nome) {
+        anterior = atual;
+        atual = atual->proximo;
+    }
 
-  delete atual;
-}
-    return;
-}
-    anterior = atual;
-    atual = atual->proximo;
- }
+    if (atual == nullptr) return;
+    if (atual->quantidade > 1) {
+        atual->quantidade--;
+        return;
+    }
+
+    if (anterior == nullptr) jogador.inventario = atual->proximo;
+    else anterior->proximo = atual->proximo;
+
+    delete atual;
 }
 
 // Organiza os itens em ordem alfabetica usando Selection Sort.
