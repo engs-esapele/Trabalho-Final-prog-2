@@ -1326,10 +1326,19 @@ int main() {
 
     conectar(intermedio, boss);
 
-    adicionarMonstro(entrada, "Slime", 30, 5);
-    adicionarMonstro(sala1, "Goblin", 40, 8);
-    adicionarMonstro(boss, "Lobo Mau", 120, 15);
-depurarMonstrosRPG(); 
+    adicionarMonstro(boss, "Chefão", 120, 15);
+    
+    // Monstros das salas 2 e 3 (sem eles essas salas nao dao chave)
+adicionarMonstro(sala1, "Esqueleto", 40, 8);
+adicionarMonstro(sala2, "Slime Azul", 60, 10);
+adicionarMonstro(sala3, "Morcego", 50, 9);
+
+// Recompensa de cada sala: chave + item
+definirRecompensaRPG(sala1, "Espada", 10, EfeitoItemRPG::COMUM);
+definirRecompensaRPG(sala2, "Armadura de Ferro", 50, EfeitoItemRPG::ARMADURA);
+definirRecompensaRPG(sala3, "Pocao de Cura", 40, EfeitoItemRPG::POCAO);
+
+depurarMonstrosRPG();
 
 
 // ==================================================
@@ -1396,6 +1405,12 @@ mostrarTutorialRPG();
     Sprite parede(texturaParede);
     parede.setScale({2.0f, 2.0f});
 
+    Texture texBoss, texSkeleto, texSlimeAzul, texbat;
+    definirSpriteMonstroRPG(sala1, texSkeleto, "img/native/monsters/skeleton.png");
+    definirSpriteMonstroRPG(sala2, texSlimeAzul, "img/native/monsters/slime_blue_1.png");
+    definirSpriteMonstroRPG(sala3, texbat, "img/native/monsters/bat_1.png");
+    definirSpriteMonstroRPG(boss, texBoss, "img/native/monsters/slime_red_1.png");
+
     // ----------------------------------------------
     // LOOP PRINCIPAL DA JANELA
     // ----------------------------------------------
@@ -1417,7 +1432,7 @@ mostrarTutorialRPG();
 // Calcula o tempo entre os quadros
 float dt = relogio.restart().asSeconds();
 
-if (processarBatalhaRPG(jogador, salaAtual, dt, gerador, janela)) continue;
+if (processarBatalhaRPG(jogador, salaAtual, dt, gerador, janela, chavesColetadas)) continue;
 
 // Movimentacao do jogador
 bool ataque = atualizarMovimentoJogadorRPG(jogador, dt);
@@ -1428,7 +1443,7 @@ atualizarControlesInventarioRPG(jogador, salaAtual);
 if (verificarEncontroRPG(jogador, salaAtual)) continue;
 
 // Atualiza o combate e a movimentacao do monstro
-atualizarCombateSalaRPG(jogador,salaAtual,dt,ataque,gerador);
+atualizarCombateSalaRPG(jogador,salaAtual,dt,false,gerador);
 if (jogador.vida <= 0) {
     jogador.vida = 0;
 

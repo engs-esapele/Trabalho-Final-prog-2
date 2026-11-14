@@ -270,9 +270,11 @@ void turnoJogadorBatalhaRPG(
     bool agiu = false;
 
     if (k1) {
-        // Atacar
+        // Atacar (a Espada no inventario aumenta o dano)
         uniform_int_distribution<int> sorteio(0, 5);
-        int dano = 15 + sorteio(gerador);
+        NoInventarioRPG* espada = buscarItemRecursivoRPG(jogador.inventario, "Espada");
+        int bonus = (espada != nullptr) ? espada->atributo : 0;
+        int dano = 15 + bonus + sorteio(gerador);
 
         batalha.monstro->vida = max(0, batalha.monstro->vida - dano);
         mensagemBatalhaRPG(batalha, "Voce atacou! Dano: " + to_string(dano));
@@ -459,6 +461,18 @@ void desenharBatalhaRPG(
     sf::RectangleShape corpoMonstro({tam, tam});
     corpoMonstro.setPosition({390.0f - tam / 2, 128.0f - tam});
     corpoMonstro.setFillColor(batalha.ehBoss ? sf::Color::Red : sf::Color(150, 50, 50));
+
+        corpoMonstro.setFillColor(batalha.ehBoss ? sf::Color::Red : sf::Color(150, 50, 50));
+
+    // Usa a mesma pixel art do monstro no mapa, se ela existir
+    const sf::Texture* spriteMonstro =
+        obterEstadoMonstroRPG(m, batalha.ehBoss)->corpo.getTexture();
+    if (spriteMonstro != nullptr) {
+        corpoMonstro.setTexture(spriteMonstro);
+        corpoMonstro.setFillColor(sf::Color::White);
+    }
+
+
     if (m->vida <= 0) {
         corpoMonstro.setFillColor(sf::Color(80, 80, 80));
     }
@@ -561,6 +575,8 @@ void desenharBatalhaRPG(
     }
 }
 
+#include "recompensas.hpp"
+
 // ============================================================================
 // FUNCOES CHAMADAS PELO MAIN (uma linha cada)
 // ============================================================================
@@ -574,7 +590,8 @@ bool processarBatalhaRPG(
     Sala* sala,
     float dt,
     mt19937& gerador,
-    sf::RenderWindow& janela
+    sf::RenderWindow& janela,
+    int& chaves
 ) {
     BatalhaRPG& b = batalhaRPG;
 
@@ -586,6 +603,10 @@ bool processarBatalhaRPG(
 
     if (b.resultado != ResultadoBatalhaRPG::NENHUM && b.tempoFim <= 0) {
         ResultadoBatalhaRPG resultado = encerrarBatalhaRPG(b, jogador, sala);
+
+        if (resultado == ResultadoBatalhaRPG::VITORIA) {
+            entregarRecompensaRPG(sala, chaves);
+        }
 
         if (resultado == ResultadoBatalhaRPG::VITORIA && sala->ehBoss) {
             cout << "\n====================" << endl;
@@ -627,4 +648,25 @@ bool verificarEncontroRPG(JogadorRPG& jogador, Sala* sala) {
     }
 
     return false;
+}
+
+
+// Aplica uma pixel art ao monstro da sala (no mapa e na batalha).
+
+bool definirSpriteMonstroRPG(Sala* sala, Texture& textura, const string& caminho) {
+    if (sala == nullptr || sala->monstro == nullptr) {
+        return false;
+    }
+
+    if (!textura.loadFromFile(caminho)) {
+        cout << "Erro ao carregar " << caminho << '\n';
+        return false;
+    }
+
+    textura.setSmooth(false); // mantem os pixels nitidos
+
+    EstadoMonstroRPG* estado = obterEstadoMonstroRPG(sala->monstro, sala->ehBoss);
+    estado->corpo.setTexture(&textura);
+    estado->corpo.setFillColor(Color::White); // sem tingir a imagem
+    return true;
 }
