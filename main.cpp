@@ -418,6 +418,73 @@ void usarPocaoRPG(JogadorRPG& jogador) {
     delete pocao;
 }
 
+// ============================================================
+// 3. ITENS NO CHAO: POSICAO, COLETA E RECUSA
+// ============================================================
+struct EstadoItemRPG {
+    Item* referencia; CircleShape desenho; EfeitoItemRPG efeito; bool avisoMostrado = false;
+    EstadoItemRPG* proximo;
+};
+EstadoItemRPG* estadosItensRPG = nullptr;
+EfeitoItemRPG identificarEfeitoItemRPG(const string& nome) {
+    string n = nome;
+    transform(n.begin(), n.end(), n.begin(),
+              [](unsigned char c) { return static_cast<char>(tolower(c)); });
+    if (n.find("pocao") != string::npos || n.find("poção") != string::npos)
+        return EfeitoItemRPG::POCAO;
+    if (n.find("armadura") != string::npos) return EfeitoItemRPG::ARMADURA;
+    return EfeitoItemRPG::COMUM;
+}
+EstadoItemRPG* obterEstadoItemRPG(Item* item, Vector2f pos,
+                                  EfeitoItemRPG efeito = EfeitoItemRPG::COMUM) {
+    for (auto e = estadosItensRPG; e; e = e->proximo)
+        if (e->referencia == item) return e;
+    if (efeito == EfeitoItemRPG::COMUM) efeito = identificarEfeitoItemRPG(item->nome);
+    auto novo = new EstadoItemRPG{item, CircleShape(7.0f), efeito, false, estadosItensRPG};
+    novo->desenho.setPosition(pos);
+    novo->desenho.setFillColor(efeito == EfeitoItemRPG::POCAO ? Color::Red :
+                               efeito == EfeitoItemRPG::ARMADURA ? Color::Cyan : Color::Yellow);
+    return estadosItensRPG = novo;
+}
+void definirPosicaoItemRPG(Item* item, Vector2f pos) {
+    if (item) obterEstadoItemRPG(item, pos)->desenho.setPosition(pos);
+}
+void adicionarItemComPosicaoRPG(Sala* sala, const string& nome, int atributo,
+                                Vector2f pos, EfeitoItemRPG efeito = EfeitoItemRPG::COMUM) {
+    adicionarItem(sala, nome, atributo); obterEstadoItemRPG(sala->itens, pos, efeito);
+}
+bool receberItemRPG(JogadorRPG& jogador, Item* item, EstadoItemRPG* estado) {
+    if (estado->efeito == EfeitoItemRPG::ARMADURA && jogador.armaduraColetada) {
+        cout << "\nVoce ja coletou uma armadura.\n";
+        return false;
+    }
+    adicionarAoInventarioRPG(jogador, item->nome, item->atributo);
+    if (estado->efeito == EfeitoItemRPG::POCAO) {
+        empilharPocaoRPG(jogador, item->nome,
+                         item->atributo > 0 ? item->atributo : jogador.vidaMax);
+        cout << "\nPocao armazenada no inventario.\n";
+    } else if (estado->efeito == EfeitoItemRPG::ARMADURA) {
+        jogador.armaduraColetada = true;
+        jogador.resistenciaArmadura = item->atributo > 0
+            ? min(item->atributo, jogador.resistenciaMax) : jogador.resistenciaMax;
+        cout << "\nArmadura equipada. Resistencia: "
+             << jogador.resistenciaArmadura << '\n';
+    } else cout << "\nItem coletado: " << item->nome << '\n';
+    return true;
+}
+void removerItemDaSalaRPG(Sala* sala, Item* item, Item* anterior) {
+    if (anterior) anterior->proximo = item->proximo;
+    else sala->itens = item->proximo;
+    EstadoItemRPG** estado = &estadosItensRPG;
+    while (*estado && (*estado)->referencia != item)
+        estado = &(*estado)->proximo;
+    if (*estado) {
+        EstadoItemRPG* apagar = *estado;
+        *estado = apagar->proximo;
+        delete apagar;
+    }
+    delete item;
+}
 
 
 
