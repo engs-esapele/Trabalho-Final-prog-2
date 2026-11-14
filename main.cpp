@@ -1273,7 +1273,17 @@ delete apagar;
 }
 ////////// final - Emily /////////////////
 
+#include "batalha.hpp" //arquivo da tela de batalha
 
+void depurarMonstrosRPG() {
+    for (NoSala* n = listaSalas; n != nullptr; n = n->proximo) {
+        Sala* s = n->sala;
+        cout << s->nome << ": ";
+        if (s->monstro == nullptr) cout << "SEM monstro\n";
+        else cout << s->monstro->nome << " vida=" << s->monstro->vida
+                  << " ataque=" << s->monstro->ataque << '\n';
+    }
+}
 
 // ==================================================
 // 7. PROGRAMA PRINCIPAL
@@ -1315,6 +1325,13 @@ int main() {
     conectar(intermedio, sala3);
 
     conectar(intermedio, boss);
+
+    adicionarMonstro(entrada, "Slime", 30, 5);
+    adicionarMonstro(sala1, "Goblin", 40, 8);
+    adicionarMonstro(boss, "Lobo Mau", 120, 15);
+depurarMonstrosRPG(); 
+
+
 // ==================================================
 // INICIALIZACAO DA PARTE DO JOGADOR - EMily
 // ==================================================
@@ -1400,11 +1417,15 @@ mostrarTutorialRPG();
 // Calcula o tempo entre os quadros
 float dt = relogio.restart().asSeconds();
 
+if (processarBatalhaRPG(jogador, salaAtual, dt, gerador, janela)) continue;
+
 // Movimentacao do jogador
 bool ataque = atualizarMovimentoJogadorRPG(jogador, dt);
 
 // Controles do inventario, coleta e pocoes
 atualizarControlesInventarioRPG(jogador, salaAtual);
+
+if (verificarEncontroRPG(jogador, salaAtual)) continue;
 
 // Atualiza o combate e a movimentacao do monstro
 atualizarCombateSalaRPG(jogador,salaAtual,dt,ataque,gerador);
