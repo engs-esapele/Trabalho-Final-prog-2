@@ -271,7 +271,7 @@ void liberarMapa() {
 }
 
 // ==================================================
-// ESTRUTURS DO JOGADOR E INVENTARIO
+// ESTRUTURS DO JOGADOR E INVENTARIO - EMILY
 // ==================================================
 enum class EfeitoItemRPG{
     COMUM,
@@ -324,8 +324,8 @@ struct JogadorRPG{
         corpo.setFillColor(Color::Blue);
         corpo.setPosition({245.0f, 120.0f});
 };
-
 // Busca recursiva na lista encadeada do inventario
+// Procura um item usando recursividade
 NoInventarioRPG* buscarItemRecursivoRPG(NoInventarioRPG* no, const string& nome) {
     if (!no || no->nome == nome) return no;
     return buscarItemRecursivoRPG(no->proximo, nome);
@@ -334,7 +334,7 @@ NoInventarioRPG* buscarItemRecursivoRPG(NoInventarioRPG* no, const string& nome)
 void adicionarAoInventarioRPG(JogadorRPG& jogador, const string& nome, int atributo) {
     NoInventarioRPG* item = buscarItemRecursivoRPG(jogador.inventario, nome);
     if (item) {
-    ++item->quantidade;
+        ++item->quantidade;
         return;
     }
     jogador.inventario = new NoInventarioRPG{ nome, atributo, 1, jogador.inventario };
@@ -344,20 +344,22 @@ void removerUmItemInventarioRPG(JogadorRPG& jogador, const string& nome) {
     NoInventarioRPG* atual = jogador.inventario;
     NoInventarioRPG* anterior = nullptr;
     while (atual) {
-    if (atual->nome == nome) {
-     if (atual->quantidade > 1) --atual->quantidade;
-else {
-    if (anterior) anterior->proximo = atual->proximo;
-else jogador.inventario = atual->proximo;
-delete atual;
+        if (atual->nome == nome) {
+            if (atual->quantidade > 1) --atual->quantidade;
+            else {
+                if (anterior) anterior->proximo = atual->proximo;
+                else jogador.inventario = atual->proximo;
+                delete atual;
+            }
+            return;
+        }
+        anterior = atual;
+        atual = atual->proximo;
+    }
 }
-    return;
-}
-anterior = atual;
-atual = atual->proximo;
-}
-}
+
 // Selection Sort: organiza os itens pelo nome.
+// Organiza os itens em ordem alfabetica (Selection Sort).
 void ordenarInventarioRPG(NoInventarioRPG* inicio) {
     for (NoInventarioRPG* a = inicio; a; a = a->proximo) {
         NoInventarioRPG* menor = a;
@@ -367,11 +369,54 @@ void ordenarInventarioRPG(NoInventarioRPG* inicio) {
             swap(a->nome, menor->nome);
             swap(a->atributo, menor->atributo);
             swap(a->quantidade, menor->quantidade);
-        }
+    }
     }
 }
 
+void mostrarItensRecursivoRPG(NoInventarioRPG* no) {
+    if (!no) return;
+    cout << no->nome << " | Quantidade: " << no->quantidade
+         << " | Atributo: " << no->atributo << '\n';
+    mostrarItensRecursivoRPG(no->proximo);
+}
 
+void mostrarInventarioRPG(JogadorRPG& jogador) {
+    ordenarInventarioRPG(jogador.inventario);
+    cout << "\n========== INVENTARIO ==========\n";
+    if (!jogador.inventario) cout << "Inventario vazio.\n";
+    else mostrarItensRecursivoRPG(jogador.inventario);
+    
+    cout << "Pocoes: " << jogador.quantidadePocoes
+         << " | Chaves: " << jogador.chavesRegistradas << "/3\n"
+         << "Vida: " << jogador.vida << "/" << jogador.vidaMax
+         << " | Armadura: " << jogador.resistenciaArmadura
+         << "/" << jogador.resistenciaMax << '\n';
+}
+
+// Guarda a pocao no topo da pilha.
+void empilharPocaoRPG(JogadorRPG& jogador, const string& nome, int cura) {
+    jogador.topoPocoes = new NoPocaoRPG{ nome, cura, jogador.topoPocoes };
+    ++jogador.quantidadePocoes;
+}
+
+void usarPocaoRPG(JogadorRPG& jogador) {
+    if (!jogador.topoPocoes) {
+        cout << "\nVoce nao possui pocoes.\n";
+        return;
+    }
+    if (jogador.vida >= jogador.vidaMax) {
+        cout << "\nSua vida ja esta completa.\n";
+        return;
+    }
+
+    NoPocaoRPG* pocao = jogador.topoPocoes;
+    jogador.topoPocoes = pocao->proximo;
+    jogador.vida = min(jogador.vidaMax, jogador.vida + pocao->cura);
+    removerUmItemInventarioRPG(jogador, pocao->nome);
+    --jogador.quantidadePocoes;
+    cout << "Pocao utilizada. Vida: " << jogador.vida << "/" << jogador.vidaMax << '\n';
+    delete pocao;
+}
 
 
 
