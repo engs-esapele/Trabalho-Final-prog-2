@@ -1069,35 +1069,26 @@ bool detectarColisaoAABBRPG(
 
 // Aplica o dano primeiro na armadura e depois na vida.
 void receberDanoJogadorRPG(JogadorRPG& jogador, int dano) {
-    if (jogador.tempoVulneravel > 0 ||
-        jogador.vida <= 0) {
+    if (jogador.vida <= 0 || jogador.tempoVulneravel > 0) {
         return;
     }
 
-    int danoNaArmadura = dano;
+    dano = max(0, dano);
+    int danoArmadura = min(dano, jogador.resistenciaArmadura);
 
-    if (danoNaArmadura > jogador.resistenciaArmadura) {
-        danoNaArmadura = jogador.resistenciaArmadura;
-    }
-
-    jogador.resistenciaArmadura -= danoNaArmadura;
-
-    int danoNaVida = dano - danoNaArmadura;
-    jogador.vida -= danoNaVida;
-
-    if (jogador.vida < 0) {
-        jogador.vida = 0;
-    }
-
+    jogador.resistenciaArmadura -= danoArmadura;
+    jogador.vida = max(0, jogador.vida - (dano - danoArmadura));
     jogador.tempoVulneravel = 0.8f;
 
-    cout << "\nVoce recebeu um golpe.\n";
-    cout << "Dano na vida: " << danoNaVida << '\n';
-
-    if (danoNaArmadura > 0 &&
-        jogador.resistenciaArmadura == 0) {
-        cout << "Sua armadura quebrou!\n";
+    if (jogador.resistenciaArmadura == 0) {
+        jogador.armaduraColetada = false;
+        if (danoArmadura > 0) {
+            cout << "\nSua armadura quebrou!\n";
+        }
     }
+
+    cout << "\nVoce recebeu um golpe.\n";
+    cout << "Dano na vida: " << dano - danoArmadura << '\n';
 }
 
 // Atualiza o monstro, verifica ataques e verifica colisao.
