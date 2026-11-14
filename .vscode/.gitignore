@@ -1,0 +1,14 @@
+# Pasta da biblioteca SFML
+SFML/
+
+# Bibliotecas dinâmicas (DLLs)
+*.dll
+
+# Executáveis e arquivos compilados
+*.exe
+*.o
+*.out
+sfml-app
+
+# Configurações locais do VS Code
+.vscode/
