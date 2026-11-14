@@ -2,7 +2,10 @@
 #include <iostream>
 #include <string>
 #include <clocale>
-
+#include <random> // numeros aleatorios para movimentacao
+#include <cmath> //distancia e movimento
+#include <algorithm> // min, max
+#include <cctype>
 using namespace std;
 using namespace sf;
 
@@ -267,6 +270,62 @@ void liberarMapa() {
     listaSalas = nullptr;
 }
 
+// ==================================================
+// ESTRUTURS DO JOGADOR E INVENTARIO
+// ==================================================
+enum class EfeitoItemRPG{
+    COMUM,
+    POCAO,
+    ARMADURA
+};
+
+struct NoInventarioRPG{
+    string nome;
+    int atributo;
+    int quantidade;
+    NoInventarioRPG* proximo;
+};
+
+struct NoPocaoRPG{
+    string nome;
+    int cura;
+    NoPocaoRPG* proximo;
+};
+struct JogadorRPG{
+    RectangleShape corpo;
+    int vida = 100;
+    int vidaMax = 100;
+    int resistenciaArmadura = 0;
+    int resistenciaMax =100;
+    bool armaduraColetada = false;
+
+    float velocidade = 150.0f;
+    float tempoVulneravel = 0.0f;
+    float tempoAtaque = 0.0f;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ==================================================
 // 7. PROGRAMA PRINCIPAL
@@ -275,6 +334,19 @@ void liberarMapa() {
 int main() {
 
     setlocale(LC_ALL, "pt_BR.UTF-8");
+// ==================================================
+// JOGADOR
+// ==================================================
+    jogadorRPG
+
+
+
+
+
+
+
+
+
 
     // ----------------------------------------------
     // CRIACAO DAS SALAS
