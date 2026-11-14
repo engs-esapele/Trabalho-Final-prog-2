@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 #include <SFML/Graphics.hpp>    
+=======
+>>>>>>> aee262d56e1a7844f708c2343b9e173c16cdba2d
 #include <iostream>
 #include <string>
 #include <clocale>
