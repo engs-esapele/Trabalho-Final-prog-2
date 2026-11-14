@@ -1,4 +1,7 @@
-#include <SFML/Graphics.hpp>
+<<<<<<< HEAD
+#include <SFML/Graphics.hpp>    
+=======
+>>>>>>> aee262d56e1a7844f708c2343b9e173c16cdba2d
 #include <iostream>
 #include <string>
 #include <clocale>
@@ -6,6 +9,17 @@
 using namespace std;
 using namespace sf;
 
+struct Item {
+    string nome;
+    int atributo; 
+    Item* proximo;
+};
+
+struct Monstro {
+    string nome;
+    int vida;
+    int ataque;
+};
 // ==================================================
 // 1. ESTRUTURAS DO MAPA
 // ==================================================
@@ -19,10 +33,14 @@ struct Saida {
     Saida* proxima;
 };
 
+
+
 // Representa uma sala do mapa
 struct Sala {
     string nome;
     Saida* saidas;
+    Item* itens = nullptr;      // Inicializa a lista de itens como vazianicializa a lista de itens como vazia
+    Monstro* monstro = nullptr; // Inicializa sem monstro
 
     bool temChave;
     bool ehBoss;
@@ -85,7 +103,22 @@ void conectar(Sala* a, Sala* b) {
     saidaBA->proxima = b->saidas;
     b->saidas = saidaBA;
 }
+///adcionando itens e monstros nas salas
+void adicionarItem(Sala* sala, string nome, int atributo) {
+    Item* novoItem = new Item;
+    novoItem->nome = nome;
+    novoItem->atributo = atributo;
+    novoItem->proximo = sala->itens;
+    sala->itens = novoItem;
+}
 
+void adicionarMonstro(Sala* sala, string nome, int vida, int ataque) {
+    Monstro* novoMonstro = new Monstro;
+    novoMonstro->nome = nome;
+    novoMonstro->vida = vida;
+    novoMonstro->ataque = ataque;
+    sala->monstro = novoMonstro;
+}
 
 // ==================================================
 // 4. MOSTRAR AS SAIDAS NO CONSOLE
@@ -213,7 +246,15 @@ void liberarMapa() {
 
             saidaAtual = proximaSaida;
         }
-
+        if (salaAtual->monstro != nullptr) {
+            delete salaAtual->monstro;
+        }
+        Item* itemAtual = salaAtual->itens;
+        while (itemAtual != nullptr) {
+            Item* prox = itemAtual->proximo;
+            delete itemAtual;
+            itemAtual = prox;
+        }
         // Libera a sala
         delete salaAtual;
 
@@ -222,6 +263,8 @@ void liberarMapa() {
 
         noAtual = proximoNo;
     }
+
+
 
     // Indica que a lista esta vazia
     listaSalas = nullptr;
