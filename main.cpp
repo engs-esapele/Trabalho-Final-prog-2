@@ -304,6 +304,27 @@ struct JogadorRPG{
     float tempoAtaque = 0.0f;
 };
 
+// Dados do inventário
+    NoInventarioRPG* inventario = nullptr;
+    NoPocaoRPG* topoPocoes = nullptr;
+    int quantidadePocoes = 0;
+
+// Controle das teclas
+    bool inventarioAberto = false;
+    bool teclaIAnterior = false;
+    bool teclaEAnterior = false;
+    bool teclaQAnterior = false;
+    bool teclaHAnterior = false;
+    bool teclaEspacoAnterior = false;
+
+    int chavesRegistradas = 0;
+
+    JogadorRPG() {
+        corpo.setSize({18.0f, 24.0f});
+        corpo.setFillColor(Color::Blue);
+        corpo.setPosition({245.0f, 120.0f});
+};
+
 
 
 
@@ -337,7 +358,7 @@ int main() {
 // ==================================================
 // JOGADOR
 // ==================================================
-    jogadorRPG
+
 
 
 
