@@ -297,6 +297,7 @@ struct NoPocaoRPG{
 //informacoes do jogador
 struct JogadorRPG{
     RectangleShape corpo;
+    optional<Sprite> sprite;
     int vida = 100;
     int vidaMax = 100;
     int resistenciaArmadura = 0;
@@ -1422,6 +1423,22 @@ mostrarTutorialRPG();
     definirSpriteMonstroRPG(sala3, texbat, "img/native/monsters/bat_1.png");
     definirSpriteMonstroRPG(boss, texBoss, "img/native/monsters/slime_red_1.png");
 
+// ==================================================
+// PIXEL ART DO JOGADOR CONFIG- Marya
+// ==================================================
+Texture texturaJogador;
+if (!texturaJogador.loadFromFile("img/personagem.png")) { // <-- Coloque o caminho da sua imagem aqui
+    cout << "Erro ao carregar a imagem do personagem!\n";
+    return 1;
+}
+texturaJogador.setSmooth(false); // Mantem a pixel art nitida
+//Ajuste automático de tamanho
+Vector2u tamImg = texturaJogador.getSize();
+jogador.sprite.emplace(texturaJogador);
+jogador.sprite->setScale({
+    24.0f / static_cast<float>(tamImg.x),
+    32.0f / static_cast<float>(tamImg.y)
+});
     // ----------------------------------------------
     // LOOP PRINCIPAL DA JANELA
     // ----------------------------------------------
@@ -1579,7 +1596,12 @@ desenharItensSalaRPG(janela, salaAtual);
 desenharMonstroSalaRPG(janela, salaAtual);
 
 // Desenha o jogador
-janela.draw(jogador.corpo);
+if (jogador.sprite.has_value()) {
+    jogador.sprite->setPosition(jogador.corpo.getPosition());
+    janela.draw(*jogador.sprite);
+} else {
+    janela.draw(jogador.corpo);
+}
 
 // Desenha as barras de vida e armadura
 desenharBarrasJogadorRPG(janela, jogador);
