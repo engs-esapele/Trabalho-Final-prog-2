@@ -6,6 +6,7 @@
 #include <cmath> //distancia e movimento
 #include <algorithm> // min, max
 #include <cctype>
+#include <optional>
 using namespace std;
 using namespace sf;
 
