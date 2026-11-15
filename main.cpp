@@ -1436,8 +1436,8 @@ texturaJogador.setSmooth(false); // Mantem a pixel art nitida
 Vector2u tamImg = texturaJogador.getSize();
 jogador.sprite.emplace(texturaJogador);
 jogador.sprite->setScale({
-    24.0f / static_cast<float>(tamImg.x),
-    32.0f / static_cast<float>(tamImg.y)
+    35.0f / static_cast<float>(tamImg.x),
+    50.0f / static_cast<float>(tamImg.y)
 });
     // ----------------------------------------------
     // LOOP PRINCIPAL DA JANELA
