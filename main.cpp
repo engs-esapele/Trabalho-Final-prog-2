@@ -402,6 +402,12 @@ void removerUmItemInventarioRPG(
 }
 
 // Organiza os itens em ordem alfabetica usando Selection Sort.
+// Analise de complexidade (n = quantidade de itens distintos no inventario):
+//  - Comparacoes: sempre n(n-1)/2, ou seja O(n^2) no melhor, medio e pior caso.
+//  - Trocas: no maximo n-1, ou seja O(n).
+//  - Espaco extra: O(1), pois ordena no proprio inventario trocando o
+//    conteudo dos nos.
+//  - Nao e estavel: a troca pode inverter a ordem de elementos iguais.
 void ordenarInventarioRPG(NoInventarioRPG* inicio) {
     NoInventarioRPG* atual = inicio;
 
@@ -800,6 +806,7 @@ void mostrarTutorialRPG() {
     cout << "Q - Recusar item\n";
     cout << "I - Abrir ou fechar inventario\n";
     cout << "H - Usar pocao\n";
+    cout << "B - Abrir bestiario\n";
     cout << "ESPACO - Atacar monstro proximo\n";
     cout << "Vida inicial: 100/100\n";
     cout << "Armadura inicial: 0/100\n";
@@ -1274,6 +1281,7 @@ delete apagar;
 ////////// final - Emily /////////////////
 
 #include "batalha.hpp" //arquivo da tela de batalha
+#include "bestiario.hpp"
 
 void depurarMonstrosRPG() {
     for (NoSala* n = listaSalas; n != nullptr; n = n->proximo) {
@@ -1337,6 +1345,8 @@ adicionarMonstro(sala3, "Morcego", 50, 9);
 definirRecompensaRPG(sala1, "Espada", 10, EfeitoItemRPG::COMUM);
 definirRecompensaRPG(sala2, "Armadura de Ferro", 50, EfeitoItemRPG::ARMADURA);
 definirRecompensaRPG(sala3, "Pocao de Cura", 40, EfeitoItemRPG::POCAO);
+
+preencherBestiarioRPG();
 
 depurarMonstrosRPG();
 
@@ -1439,6 +1449,8 @@ bool ataque = atualizarMovimentoJogadorRPG(jogador, dt);
 
 // Controles do inventario, coleta e pocoes
 atualizarControlesInventarioRPG(jogador, salaAtual);
+
+atualizarBestiarioRPG();
 
 if (verificarEncontroRPG(jogador, salaAtual)) continue;
 
