@@ -105,7 +105,7 @@ Cada `Sala` é um vértice. Cada `Saida` é um nó de lista encadeada que aponta
 ## Divisão de responsabilidades
 
 | Integrante | Responsabilidades |
-|---|---|
+|------------|-------------------|
 | **Isabely** | Sistema de batalha e recompensas, mapa, readme |
 | **Emily** | Movimentação e colisões, detecção de objetos, inventário e itens |
-| **Marya** | Monstros e pixel arts |
+| **Marya** | Monstros e pixel arts, e ajustes finais |
