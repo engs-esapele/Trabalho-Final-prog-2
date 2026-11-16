@@ -108,4 +108,4 @@ Cada `Sala` é um vértice. Cada `Saida` é um nó de lista encadeada que aponta
 |------------|-------------------|
 | **Isabely** | Sistema de batalha e recompensas, mapa, readme |
 | **Emily** | Movimentação e colisões, detecção de objetos, inventário e itens |
-| **Marya** | Monstros e pixel arts, e ajustes finais |
+| **Marya** | Monstros, pixel arts e ajustes finais |
