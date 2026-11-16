@@ -837,6 +837,8 @@ if (estado->sprite.has_value()) {
         } else {
             janela.draw(estado->desenho);
  }
+ atual = atual->proximo;
+        numero++;
 }
 }
 
@@ -1644,7 +1646,7 @@ aplicarTexturasItensRPG(texPocao, texArmadura, texItemComum);
                 janela.close();
             }
         }
-
+        if (!janela.isOpen()) break;
         // Limpa a janela
         janela.clear(Color::Black);
 
