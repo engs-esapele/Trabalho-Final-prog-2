@@ -1,7 +1,7 @@
-#include <SFML/Graphics.hpp>    
+#include <SFML/Graphics.hpp>  //inserção de imagens
 #include <iostream>
 #include <string>
-#include <clocale>
+#include <clocale> 
 #include <random> // numeros aleatorios para movimentacao
 #include <cmath> //distancia e movimento
 #include <algorithm> // min, max
@@ -47,7 +47,7 @@ struct Sala {
     bool ehBoss;
 };
 
-// Lista encadeada que registra todas as salas
+// Lista encadeada que registra todas as salas 
 struct NoSala {
     Sala* sala;
     NoSala* proximo;
@@ -71,14 +71,14 @@ Sala* criarSala(string nome) {
     novaSala->temChave = false;
     novaSala->ehBoss = false;
 
-    // Cria um no para registrar a sala
+    // Cria um no para registrar a sala. O nó é só um “crachá” que aponta para a sala.
     NoSala* novoNo = new NoSala;
-
     novoNo->sala = novaSala;
 
     // Insere o no no inicio da lista
-    novoNo->proximo = listaSalas;
-    listaSalas = novoNo;
+    novoNo->proximo = listaSalas; // a ficha nova aponta para quem era a primeira
+    listaSalas = novoNo;            // agora a primeira é a nova
+
 
     return novaSala;
 }
@@ -283,7 +283,7 @@ enum class EfeitoItemRPG{
 //cada ekemento guarda um item no inventario
 struct NoInventarioRPG{
     string nome;
-    int atributo;
+    int atributo; // valor numerico associado
     int quantidade;
     NoInventarioRPG* proximo;
 };
@@ -291,13 +291,13 @@ struct NoInventarioRPG{
 struct NoPocaoRPG{
     string nome;
     int cura;
-    NoPocaoRPG* proximo;
+    NoPocaoRPG* proximo; // pocao abaixo da pilha
 };
 
 //informacoes do jogador
 struct JogadorRPG{
     RectangleShape corpo;
-    optional<Sprite> sprite;
+    optional<Sprite> sprite; //imagem opcional desenhada no lugar de "corpo" quando ha uma textura carregada struct JogadorRPG
     int vida = 100;
     int vidaMax = 100;
     int resistenciaArmadura = 0;
@@ -323,6 +323,8 @@ struct JogadorRPG{
     bool teclaHAnterior = false;
     bool teclaEspacoAnterior = false;
 
+    // Construtor: define tamanho, cor e posicao inicial do retangulo do
+    // jogador assim que um objeto JogadorRPG e criado.
     JogadorRPG() {
         corpo.setSize({18.0f, 24.0f});
         corpo.setFillColor(Color::Blue);
@@ -335,6 +337,10 @@ struct JogadorRPG{
 // ============================================================
 
 // Procura um item pelo nome usando recursividade.
+// Parametros:
+//   atual - no atual da busca (chamar inicialmente com o inicio da lista)
+//   nome  - nome do item procurado
+// Retorno: ponteiro para o no encontrado, ou nullptr se nao existir
 NoInventarioRPG* buscarItemRecursivoRPG(
     NoInventarioRPG* atual,
     const string& nome
@@ -352,6 +358,12 @@ NoInventarioRPG* buscarItemRecursivoRPG(
 
 // Adiciona um item ao inventario.
 // Se ele ja existir, aumenta a quantidade.
+// Parametros:
+//   jogador  - jogador dono do inventario
+//   nome     - nome do item
+//   atributo - valor numerico associado ao item (usado como no caso de
+//   pocao/armadura ao ser coletado)
+// Retorno: nenhum
 void adicionarAoInventarioRPG(
     JogadorRPG& jogador,
     const string& nome,
@@ -385,6 +397,7 @@ void removerUmItemInventarioRPG(
     NoInventarioRPG* atual = jogador.inventario;
     NoInventarioRPG* anterior = nullptr;
 
+    // Percorre a lista ate achar o item ou chegar ao fim.
     while (atual != nullptr && atual->nome != nome) {
         anterior = atual;
         atual = atual->proximo;
@@ -395,7 +408,7 @@ void removerUmItemInventarioRPG(
         atual->quantidade--;
         return;
     }
-
+// So chega aqui quando restava 1 unidade: remove o no da lista.
     if (anterior == nullptr) jogador.inventario = atual->proximo;
     else anterior->proximo = atual->proximo;
 
@@ -409,9 +422,14 @@ void removerUmItemInventarioRPG(
 //  - Espaco extra: O(1), pois ordena no proprio inventario trocando o
 //    conteudo dos nos.
 //  - Nao e estavel: a troca pode inverter a ordem de elementos iguais.
+// Parametros:
+//   inicio - primeiro no do inventario a ordenar
+// Retorno: nenhum (a lista e reordenada no proprio lugar)
 void ordenarInventarioRPG(NoInventarioRPG* inicio) {
     NoInventarioRPG* atual = inicio;
 
+// "menor" comeca apontando para o no atual e vai sendo atualizado
+// sempre que um nome menor e encontrado no restante da lista.
 while (atual != nullptr) {
     NoInventarioRPG* menor = atual;
     NoInventarioRPG* proximo = atual->proximo;
@@ -424,6 +442,8 @@ while (proximo != nullptr) {
 proximo = proximo->proximo;
         }
 
+// Troca o CONTEUDO dos nos (nao os ponteiros), o que e mais simples
+// numa lista encadeada do que religar os nos.
 if (menor != atual) {
      swap(atual->nome, menor->nome);
      swap(atual->atributo, menor->atributo);
@@ -434,6 +454,9 @@ if (menor != atual) {
 }
 
 // Mostra os itens usando recursividade.
+// Parametros:
+//atual - no atual a exibir (chamar inicialmente com o inicio da lista)
+// Retorno: nenhum
 void mostrarItensRecursivoRPG(NoInventarioRPG* atual) {
     if (atual == nullptr) {
         return;
@@ -446,6 +469,9 @@ cout << atual->nome
 }
 
 // Mostra o inventario completo.
+// Parametros:
+//   jogador - jogador cujo inventario sera exibido
+// Retorno: nenhum
 void mostrarInventarioRPG(JogadorRPG& jogador) {
     ordenarInventarioRPG(jogador.inventario);
 
@@ -469,6 +495,11 @@ cout << "\n========== INVENTARIO ==========\n";
 // ============================================================
 
 // Coloca uma pocao no topo da pilha.
+// Parametros:
+//   jogador - jogador dono da pilha
+//   nome    - nome da pocao
+//   cura    - vida restaurada ao usar essa pocao
+// Retorno: nenhum
 void empilharPocaoRPG(
     JogadorRPG& jogador,
     const string& nome,
@@ -515,6 +546,10 @@ void usarPocaoRPG(JogadorRPG& jogador) {
 
 // Como a estrutura Item do grupo nao possui posicao,
 // esta estrutura guarda a posicao visual de cada item.
+// referencia = item do mapa a que este estado pertence (usado como "chave" de busca)
+// desenho = circulo colorido usado como representacao padrao do item
+// sprite = imagem opcional (pixel art) usada no lugar do circulo, se houver textura
+// efeito = o que o item faz ao ser coletado | avisoMostrado = evita repetir a mensagem "item proximo"
 struct EstadoItemRPG {
     Item* referencia;
     sf::CircleShape desenho;
@@ -524,9 +559,15 @@ struct EstadoItemRPG {
     EstadoItemRPG* proximo;
 };
 
+// Cabeca da lista encadeada global com o estado visual de todos os itens
+// ja vistos em qualquer sala (cresce conforme novos itens sao descobertos).
 EstadoItemRPG* estadosItensRPG = nullptr;
 
 // Descobre o tipo do item pelo nome.
+// Parametros:
+//   nome - nome do item
+// Retorno: POCAO se o nome contiver "pocao"/"poção", ARMADURA se contiver
+//          "armadura", ou COMUM nos demais casos
 EfeitoItemRPG identificarEfeitoItemRPG(const std::string& nome) {
     if (nome.find("Pocao") != string::npos || nome.find("pocao") != string::npos ||
  nome.find("Poção") != string::npos || nome.find("poção") != string::npos) {
@@ -538,14 +579,19 @@ EfeitoItemRPG identificarEfeitoItemRPG(const std::string& nome) {
     }
     return EfeitoItemRPG::COMUM;
 }
-// Aplica uma textura de pixel art a um item no chao.
+// // Aplica uma textura de pixel art a um item no chao.
+// Parametros:
+//   estado  - estado do item que vai receber o sprite (se for nullptr, nao faz nada)
+//   textura - textura (imagem) a aplicar no sprite
+// Retorno: nenhum
 void configurarSpriteItemRPG(EstadoItemRPG* estado, const sf::Texture& textura) {
     if (estado == nullptr) return;
     estado->sprite.emplace(textura);
     sf::Vector2u tam = textura.getSize();
     estado->sprite->setScale({
-        18.0f / static_cast<float>(tam.x),
-        18.0f / static_cast<float>(tam.y)
+        18.0f / static_cast<float>(tam.x), // Reescala a imagem (que pode ter qualquer tamanho em pixels) para
+        18.0f / static_cast<float>(tam.y) // caber dentro de um quadrado de 18x18, dividindo 18 pelo tamanho
+    // original de cada eixo.
     });
 }
 
@@ -565,6 +611,9 @@ void aplicarTexturasItensRPG(
 
     EstadoItemRPG* atual = estadosItensRPG;
     while (atual != nullptr) {
+// getSize().x > 0 e usado aqui como uma forma simples de checar se
+        // a textura foi realmente carregada (uma Textura vazia/nao
+        // carregada tem tamanho 0).
         if (atual->efeito == EfeitoItemRPG::POCAO && texPocao.getSize().x > 0) {
             configurarSpriteItemRPG(atual, texPocao);
         } else if (atual->efeito == EfeitoItemRPG::ARMADURA && texArmadura.getSize().x > 0) {
@@ -578,6 +627,12 @@ void aplicarTexturasItensRPG(
 
 // Procura os dados visuais do item.
 // Se ainda nao existirem, cria esses dados.
+// Parametros:
+//   item    - item cujo estado visual se quer obter
+//   posicao - posicao a usar caso o estado precise ser criado agora
+//   efeito  - efeito a usar caso precise ser criado (por padrao e descoberto
+//             automaticamente a partir do nome do item)
+// Retorno: ponteiro para o estado do item
 EstadoItemRPG* obterEstadoItemRPG(
     Item* item,
     sf::Vector2f posicao,
@@ -585,6 +640,7 @@ EstadoItemRPG* obterEstadoItemRPG(
 ) {
     EstadoItemRPG* atual = estadosItensRPG;
 
+    // Primeiro procura se este item ja tem um estado criado
     while (atual != nullptr) {
         if (atual->referencia == item) {
             return atual;
@@ -596,7 +652,7 @@ EstadoItemRPG* obterEstadoItemRPG(
     if (efeito == EfeitoItemRPG::COMUM) {
         efeito = identificarEfeitoItemRPG(item->nome);
     }
-
+// Nao existia: cria um novo estado e insere no inicio da lista global
     EstadoItemRPG* novoEstado = new EstadoItemRPG;
 
     novoEstado->referencia = item;
@@ -629,6 +685,10 @@ estadosItensRPG = novoEstado;
 }
 
 // Define a posicao de um item que ja existe.
+// Parametros:
+//   item    - item a reposicionar
+//   posicao - nova posicao
+// Retorno: nenhum
 void definirPosicaoItemRPG(Item* item, sf::Vector2f posicao) {
     if (item == nullptr) {
         return;
@@ -641,6 +701,13 @@ void definirPosicaoItemRPG(Item* item, sf::Vector2f posicao) {
 }
 
 // Cria um item usando a funcao do grupo e define sua posicao.
+// Parametros:
+//   sala     - sala onde o item sera colocado
+//   nome     - nome do item
+//   atributo - valor numerico do item
+//   posicao  - posicao onde o item sera desenhado
+//   efeito   - efeito do item (opcional; descoberto pelo nome se omitido)
+// Retorno: nenhum
 void adicionarItemComPosicaoRPG(
     Sala* sala,
     const std::string& nome,
@@ -654,6 +721,12 @@ void adicionarItemComPosicaoRPG(
 }
 
 // Coloca o item coletado no inventario e aplica seu efeito.
+// Parametros:
+//   jogador - jogador que esta coletando o item
+//   item    - item sendo coletado
+//   estado  - estado visual/efeito associado ao item
+// Retorno: true se o item foi efetivamente coletado; false se foi recusado
+//          (por exemplo, ao tentar pegar uma segunda armadura)
 bool receberItemRPG(
     JogadorRPG& jogador,
     Item* item,
@@ -699,20 +772,28 @@ cout << "\nItem coletado: " << item->nome << '\n';
 }
 
 // Retira o item da sala e apaga seus dados visuais.
+// Parametros:
+//   sala         - sala de onde o item sera removido
+//   item         - item a remover
+//   itemAnterior - no anterior a "item" na lista da sala (nullptr se
+// "item" for o primeiro da lista)
+// Retorno: nenhum
 void removerItemDaSalaRPG(
     Sala* sala,
     Item* item,
     Item* itemAnterior
 ) {
+    // Desvincula o item da lista da sala antes de apagar (evita deixar
+    // um ponteiro pendurado apontando para memoria ja liberada).
     if (itemAnterior == nullptr) {
         sala->itens = item->proximo;
     } else {
         itemAnterior->proximo = item->proximo;
     }
-
     EstadoItemRPG* atual = estadosItensRPG;
     EstadoItemRPG* anterior = nullptr;
 
+// Procura e remove o estado visual correspondente a este item.
     while (atual != nullptr) {
     if (atual->referencia == item) {
    if (anterior == nullptr) {
@@ -730,6 +811,9 @@ delete item;
 }
 
 // Define posicoes automaticas quando o grupo nao informou uma.
+// Parametros:
+//   numero - indice do item dentro da lista da sala
+// Retorno: posicao (x, y) na tela correspondente a esse indice
 sf::Vector2f posicaoPadraoItemRPG(int numero) {
     float x = 80.0f + (numero % 5) * 80.0f;
     float y = 75.0f + (numero / 5) * 55.0f;
@@ -746,15 +830,14 @@ while (atual != nullptr){
     sf::Vector2f posicao = posicaoPadraoItemRPG(numero);
     EstadoItemRPG* estado = obterEstadoItemRPG(atual, posicao);
 
+    // Desenha o sprite (pixel art) se houver um configurado; caso
+// contrario, desenha o circulo colorido padrao.
 if (estado->sprite.has_value()) {
             estado->sprite->setPosition(estado->desenho.getPosition());
             janela.draw(*estado->sprite);
         } else {
             janela.draw(estado->desenho);
-        }
-
-        atual = atual->proximo;
-        numero++;
+ }
 }
 }
 
@@ -770,7 +853,7 @@ bool pressionouTeclaRPG(
 }
     teclaAnterior = teclaAtual;
     return false;
-}
+} // Retorno: true se a tecla acabou de ser pressionada neste quadro
 
 // Procura o item mais proximo do jogador e permite coletar ou recusar.
 void atualizarColetaItensRPG(JogadorRPG& jogador, Sala* sala) {
@@ -792,7 +875,8 @@ void atualizarColetaItensRPG(JogadorRPG& jogador, Sala* sala) {
     int numero = 0;
     Item* atual = sala->itens;
 
-    // Percorre todos os itens da sala.
+    // Percorre todos os itens da sala procurando o mais proximo do jogador
+    // (usa distancia ao quadrado para nao precisar calcular raiz quadrada).
     while (atual != nullptr) {
  sf::Vector2f posItem = posicaoPadraoItemRPG(numero);
         EstadoItemRPG* estado =
@@ -900,6 +984,8 @@ cout << "\nInventario fechado.\n";
 }
 
 // Movimenta o jogador e informa se ele atacou.
+//   tempo   - tempo decorrido desde o ultimo quadro (em segundos)
+// Retorno: true se o jogador acabou de iniciar um ataque neste quadro
 bool atualizarMovimentoJogadorRPG(
     JogadorRPG& jogador,
     float tempo
@@ -1004,9 +1090,15 @@ struct EstadoMonstroRPG {
     EstadoMonstroRPG* proximo;
 };
 
+// Cabeca da lista encadeada global com o estado de todos os monstros
+// ja vistos em qualquer sala.
 EstadoMonstroRPG* estadosMonstrosRPG = nullptr;
 
 // Procura o estado visual do monstro ou cria um novo.
+// referencia = monstro do mapa a que este estado pertence
+// corpo = retangulo usado para desenhar/colidir | direcao = vetor normalizado
+// de movimento | tempoParaNovaDirecao = contagem regressiva para sortear
+// uma nova direcao | velocidade = pixels por segundo do monstro
 EstadoMonstroRPG* obterEstadoMonstroRPG(
     Monstro* monstro,
     bool ehBoss
@@ -1020,11 +1112,11 @@ EstadoMonstroRPG* obterEstadoMonstroRPG(
 
         atual = atual->proximo;
     }
-
     EstadoMonstroRPG* novoEstado = new EstadoMonstroRPG;
 
     novoEstado->referencia = monstro;
 
+// Boss e maior e mais rapido que um monstro comum.
     if (ehBoss) {
         novoEstado->corpo.setSize(sf::Vector2f(90.0f, 90.0f));
         novoEstado->corpo.setFillColor(sf::Color::Red);
@@ -1046,10 +1138,16 @@ EstadoMonstroRPG* obterEstadoMonstroRPG(
 }
 
 // Faz o monstro andar e mudar de direcao aleatoriamente.
+// Parametros:
+//   monstro - estado do monstro a movimentar
+//   tempo   - tempo decorrido desde o ultimo quadro
+//   gerador - gerador de numeros aleatorios usado para sortear a direcao
+// Retorno: nenhum
 void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerador) {
     monstro.tempoParaNovaDirecao -= tempo;
 
-    // Escolhe uma nova direcao aleatoria.
+    // Escolhe uma nova direcao aleatoria (x e y entre -1, 0 e 1; se os
+    // dois sairem 0, forca x=1 para o monstro nao ficar parado).
     if (monstro.tempoParaNovaDirecao <= 0) {
         uniform_int_distribution<int> distribuicao(-1, 1);
 
@@ -1060,6 +1158,8 @@ void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerado
             x = 1;
         }
 
+         // Normaliza o vetor (x, y) para que a velocidade na diagonal
+        // nao fique maior do que na horizontal/vertical.
         float tamanho = std::sqrt(
             static_cast<float>(x * x + y * y)
         );
@@ -1076,7 +1176,8 @@ void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerado
     posicao.x += monstro.direcao.x * monstro.velocidade * tempo;
     posicao.y += monstro.direcao.y * monstro.velocidade * tempo;
 
-    // Impede que o monstro atravesse as paredes.
+    // Impede que o monstro atravesse as paredes; ao bater, inverte a
+    // direcao naquele eixo (efeito de "quicar" na parede).
     if (posicao.x < 32 ||
         posicao.x + tamanhoMonstro.x > 480) {
 
@@ -1105,7 +1206,12 @@ void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerado
 }
 
 
-// Verifica se dois retangulos estao encostando.
+// Verifica se dois retangulos estao encostando (colisao AABB: Axis-Aligned
+// Bounding Box, ou seja, retangulos alinhados aos eixos x/y).
+// Parametros:
+//   primeiro - primeiro retangulo
+//   segundo  - segundo retangulo
+// Retorno: true se os retangulos estiverem encostando/sobrepostos
 bool detectarColisaoAABBRPG(
     const sf::RectangleShape& primeiro,
     const sf::RectangleShape& segundo
@@ -1116,6 +1222,9 @@ bool detectarColisaoAABBRPG(
     sf::Vector2f posB = segundo.getPosition();
     sf::Vector2f tamB = segundo.getSize();
 
+    // Dois retangulos se sobrepoem num eixo se o inicio de um e menor que
+    // o fim do outro, nos dois sentidos; a colisao real exige isso nos
+    // dois eixos (x e y) ao mesmo tempo.
     bool colisaoX = posA.x < posB.x + tamB.x &&
                     posA.x + tamA.x > posB.x;
 
@@ -1127,17 +1236,23 @@ bool detectarColisaoAABBRPG(
 
 // Aplica o dano primeiro na armadura e depois na vida.
 void receberDanoJogadorRPG(JogadorRPG& jogador, int dano) {
+
+    // Ignora o dano se o jogador ja estiver morto ou ainda estiver no
+    // periodo de invulnerabilidade apos o ultimo golpe.
     if (jogador.vida <= 0 || jogador.tempoVulneravel > 0) {
         return;
     }
 
     dano = max(0, dano);
+     // A armadura absorve o quanto puder do dano; o restante vai para a vida.
     int danoArmadura = min(dano, jogador.resistenciaArmadura);
 
     jogador.resistenciaArmadura -= danoArmadura;
     jogador.vida = max(0, jogador.vida - (dano - danoArmadura));
     jogador.tempoVulneravel = 0.8f;
 
+    // Quando a armadura chega a 0, ela e desequipada (armaduraColetada
+    // volta a false), permitindo que o jogador colete uma nova armadura
     if (jogador.resistenciaArmadura == 0) {
         jogador.armaduraColetada = false;
         if (danoArmadura > 0) {
@@ -1150,6 +1265,8 @@ void receberDanoJogadorRPG(JogadorRPG& jogador, int dano) {
 }
 
 // Atualiza o monstro, verifica ataques e verifica colisao.
+//   jogadorAtacou - true se o jogador acabou de atacar neste quadro
+//   gerador       - gerador de numeros aleatorios (usado na movimentacao do monstro)
 void atualizarCombateSalaRPG(JogadorRPG& jogador,Sala* sala,float tempo,bool jogadorAtacou,mt19937& gerador) 
 {
     // O parametro gerador e mantido para continuar compativel
@@ -1166,7 +1283,8 @@ void atualizarCombateSalaRPG(JogadorRPG& jogador,Sala* sala,float tempo,bool jog
 
     movimentarMonstroRPG(*estado, tempo, gerador);
 
-    // Verifica se o jogador acertou o monstro.
+    // Verifica se o jogador acertou o monstro (compara a distancia ao
+    // quadrado entre os centros com o alcance de ataque, 55 pixels).
     if (jogadorAtacou) {
         sf::Vector2f posJogador = jogador.corpo.getPosition();
         sf::Vector2f tamJogador = jogador.corpo.getSize();
@@ -1241,7 +1359,7 @@ void desenharBarraRPG(sf::RenderWindow& janela,sf::Vector2f posicao,
     if (valorMaximo > 0) {
         porcentagem = static_cast<float>(valor) / valorMaximo;
     }
-
+// Garante que a porcentagem fique sempre entre 0 e 1.
     if (porcentagem < 0) {
         porcentagem = 0;
     }
@@ -1293,6 +1411,10 @@ void desenharBarrasJogadorRPG(
 }
 
 // Atualiza o inventario quando uma chave e coletada no mapa
+// Parametros:
+//   jogador         - jogador a atualizar
+//   chavesColetadas - total de chaves ja coletadas no mapa
+// Retorno: nenhum
 void sincronizarChavesInventarioRPG(JogadorRPG& jogador, int chavesColetadas) {
     while (jogador.chavesRegistradas < chavesColetadas) {
     adicionarAoInventarioRPG(jogador, "Chave", 0);
@@ -1307,6 +1429,13 @@ void sincronizarChavesInventarioRPG(JogadorRPG& jogador, int chavesColetadas) {
 // Apaga os elementos criados dinamicamente pelo modulo do jogador
 // Nao apaga os itens e monstros do mapa: essa tarefa continua sendo
 // feita pela funcao liberarMapa() 
+// Parametros:
+//   jogador - jogador q as listas (inventario e pilha de pocoes) serao liberadas
+// Retorno: nenhum
+// Observacao: os campos "sprite" (optional<Sprite>) nao precisam de delete
+// manual aqui - eles sao destruidos automaticamente junto com o
+// EstadoItemRPG/JogadorRPG que os contem (gerenciamento automatico do
+// std::optional / do proprio objeto sf::Sprite).
 void liberarModuloJogadorRPG(JogadorRPG& jogador) {
     while (jogador.inventario != nullptr) {
         NoInventarioRPG* apagar = jogador.inventario;
