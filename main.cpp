@@ -550,12 +550,20 @@ void configurarSpriteItemRPG(EstadoItemRPG* estado, const sf::Texture& textura) 
     });
 }
 
+const sf::Texture* texPocaoGlobal = nullptr;
+const sf::Texture* texArmaduraGlobal = nullptr;
+const sf::Texture* texComumGlobal = nullptr;
+
 // Aplica texturas de pixel art a todos os itens criados no mapa.
 void aplicarTexturasItensRPG(
     const sf::Texture& texPocao,
     const sf::Texture& texArmadura,
     const sf::Texture& texComum
 ) {
+    texPocaoGlobal = &texPocao;
+    texArmaduraGlobal = &texArmadura;
+    texComumGlobal = &texComum;
+
     EstadoItemRPG* atual = estadosItensRPG;
     while (atual != nullptr) {
         if (atual->efeito == EfeitoItemRPG::POCAO && texPocao.getSize().x > 0) {
@@ -609,7 +617,15 @@ EstadoItemRPG* obterEstadoItemRPG(
     }
 
     estadosItensRPG = novoEstado;
+estadosItensRPG = novoEstado;
 
+    if (novoEstado->efeito == EfeitoItemRPG::POCAO && texPocaoGlobal != nullptr && texPocaoGlobal->getSize().x > 0) {
+        configurarSpriteItemRPG(novoEstado, *texPocaoGlobal);
+    } else if (novoEstado->efeito == EfeitoItemRPG::ARMADURA && texArmaduraGlobal != nullptr && texArmaduraGlobal->getSize().x > 0) {
+        configurarSpriteItemRPG(novoEstado, *texArmaduraGlobal);
+    } else if (texComumGlobal != nullptr && texComumGlobal->getSize().x > 0) {
+        configurarSpriteItemRPG(novoEstado, *texComumGlobal);
+    }
     return novoEstado;
 }
 
@@ -738,7 +754,6 @@ if (estado->sprite.has_value()) {
             janela.draw(estado->desenho);
         }
 
-        janela.draw(estado->desenho);
         atual = atual->proximo;
         numero++;
 }
@@ -1457,9 +1472,9 @@ mostrarTutorialRPG();
 
     Texture texBoss, texSkeleto, texSlimeAzul, texbat;
     definirSpriteMonstroRPG(sala1, texSkeleto, "img/native/monsters/skeleton.png");
-    definirSpriteMonstroRPG(sala2, texSlimeAzul, "C:\\Users\\rilso\\OneDrive\\Área de Trabalho\\trabalho final\\Trabalho-Final-prog-2\\img\\pixel art\\slime.png");
-    definirSpriteMonstroRPG(sala3, texbat, "C:\\Users\\rilso\\OneDrive\\Área de Trabalho\\trabalho final\\Trabalho-Final-prog-2\\img\\pixel art\\morcego.png");
-    definirSpriteMonstroRPG(boss, texBoss, "C:\\Users\\rilso\\OneDrive\\Área de Trabalho\\trabalho final\\Trabalho-Final-prog-2\\img\\pixel art\\slimered.png");
+    definirSpriteMonstroRPG(sala2, texSlimeAzul, "img/pixel art/slime.png");
+    definirSpriteMonstroRPG(sala3, texbat, "img/pixel art/morcego.png");
+    definirSpriteMonstroRPG(boss, texBoss, "img/pixel art/slimered.png");
 
 // ==================================================
 // PIXEL ART DO JOGADOR CONFIG- Marya
@@ -1483,9 +1498,9 @@ jogador.sprite->setScale({
 //==================================================
 Texture texPocao, texArmadura, texItemComum;
 
-if (texPocao.loadFromFile("C:\\Users\\rilso\\OneDrive\\Área de Trabalho\\trabalho final\\Trabalho-Final-prog-2\\img\\pixel art\\poção.png")) texPocao.setSmooth(false);
-if (texArmadura.loadFromFile("C:\\Users\\rilso\\OneDrive\\Área de Trabalho\\trabalho final\\Trabalho-Final-prog-2\\img\\pixel art\\arm.png")) texArmadura.setSmooth(false);
-if (texItemComum.loadFromFile("C:\\Users\\rilso\\OneDrive\\Área de Trabalho\\trabalho final\\Trabalho-Final-prog-2\\img\\pixel art\\espada.png")) texItemComum.setSmooth(false);
+if (texPocao.loadFromFile("img/pixel art/pocao.png")) texPocao.setSmooth(false);
+if (texArmadura.loadFromFile("img/pixel art/arm.png")) texArmadura.setSmooth(false);
+if (texItemComum.loadFromFile("img/pixel art/espada.png")) texItemComum.setSmooth(false);
 
 aplicarTexturasItensRPG(texPocao, texArmadura, texItemComum);
     // ----------------------------------------------
@@ -1627,7 +1642,9 @@ teclaFAntes = teclaFAtual;
 
         // ------------------------------------------
         // PAREDE DIREITA
-        // ------------------------------------------
+        
+
+
 
         for (int linha = 0; linha < 8; linha++) {
 
