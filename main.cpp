@@ -6,6 +6,7 @@
 #include <cmath> //distancia e movimento
 #include <algorithm> // min, max
 #include <cctype>
+#include <optional>
 using namespace std;
 using namespace sf;
 
@@ -296,6 +297,7 @@ struct NoPocaoRPG{
 //informacoes do jogador
 struct JogadorRPG{
     RectangleShape corpo;
+    optional<Sprite> sprite;
     int vida = 100;
     int vidaMax = 100;
     int resistenciaArmadura = 0;
@@ -311,7 +313,8 @@ struct JogadorRPG{
     NoPocaoRPG* topoPocoes = nullptr;
     int quantidadePocoes = 0;
     int itensRecusados=0;
-
+    int chavesRegistradas = 0;
+    
 // Controle das teclas
     bool inventarioAberto = false;
     bool teclaIAnterior = false;
@@ -319,8 +322,6 @@ struct JogadorRPG{
     bool teclaQAnterior = false;
     bool teclaHAnterior = false;
     bool teclaEspacoAnterior = false;
-
-    int chavesRegistradas = 0;
 
     JogadorRPG() {
         corpo.setSize({18.0f, 24.0f});
@@ -517,6 +518,7 @@ void usarPocaoRPG(JogadorRPG& jogador) {
 struct EstadoItemRPG {
     Item* referencia;
     sf::CircleShape desenho;
+    optional<sf::Sprite> sprite; //para colocar a foto do item
     EfeitoItemRPG efeito;
     bool avisoMostrado;
     EstadoItemRPG* proximo;
@@ -535,6 +537,43 @@ EfeitoItemRPG identificarEfeitoItemRPG(const std::string& nome) {
         return EfeitoItemRPG::ARMADURA;
     }
     return EfeitoItemRPG::COMUM;
+}
+// Aplica uma textura de pixel art a um item no chao.
+void configurarSpriteItemRPG(EstadoItemRPG* estado, const sf::Texture& textura) {
+    if (estado == nullptr) return;
+    estado->sprite.emplace(textura);
+    sf::Vector2u tam = textura.getSize();
+    estado->sprite->setScale({
+        18.0f / static_cast<float>(tam.x),
+        18.0f / static_cast<float>(tam.y)
+    });
+}
+
+const sf::Texture* texPocaoGlobal = nullptr;
+const sf::Texture* texArmaduraGlobal = nullptr;
+const sf::Texture* texComumGlobal = nullptr;
+
+// Aplica texturas de pixel art a todos os itens criados no mapa.
+void aplicarTexturasItensRPG(
+    const sf::Texture& texPocao,
+    const sf::Texture& texArmadura,
+    const sf::Texture& texComum
+) {
+    texPocaoGlobal = &texPocao;
+    texArmaduraGlobal = &texArmadura;
+    texComumGlobal = &texComum;
+
+    EstadoItemRPG* atual = estadosItensRPG;
+    while (atual != nullptr) {
+        if (atual->efeito == EfeitoItemRPG::POCAO && texPocao.getSize().x > 0) {
+            configurarSpriteItemRPG(atual, texPocao);
+        } else if (atual->efeito == EfeitoItemRPG::ARMADURA && texArmadura.getSize().x > 0) {
+            configurarSpriteItemRPG(atual, texArmadura);
+        } else if (texComum.getSize().x > 0) {
+            configurarSpriteItemRPG(atual, texComum);
+        }
+        atual = atual->proximo;
+    }
 }
 
 // Procura os dados visuais do item.
@@ -577,7 +616,15 @@ EstadoItemRPG* obterEstadoItemRPG(
     }
 
     estadosItensRPG = novoEstado;
+estadosItensRPG = novoEstado;
 
+    if (novoEstado->efeito == EfeitoItemRPG::POCAO && texPocaoGlobal != nullptr && texPocaoGlobal->getSize().x > 0) {
+        configurarSpriteItemRPG(novoEstado, *texPocaoGlobal);
+    } else if (novoEstado->efeito == EfeitoItemRPG::ARMADURA && texArmaduraGlobal != nullptr && texArmaduraGlobal->getSize().x > 0) {
+        configurarSpriteItemRPG(novoEstado, *texArmaduraGlobal);
+    } else if (texComumGlobal != nullptr && texComumGlobal->getSize().x > 0) {
+        configurarSpriteItemRPG(novoEstado, *texComumGlobal);
+    }
     return novoEstado;
 }
 
@@ -691,6 +738,7 @@ sf::Vector2f posicaoPadraoItemRPG(int numero) {
 
 // Desenha os itens que estao na sala.
 void desenharItensSalaRPG(sf::RenderWindow& janela, Sala* sala) {
+    if (sala == nullptr) return;
     int numero = 0;
     Item* atual = sala->itens;
 
@@ -698,7 +746,13 @@ while (atual != nullptr){
     sf::Vector2f posicao = posicaoPadraoItemRPG(numero);
     EstadoItemRPG* estado = obterEstadoItemRPG(atual, posicao);
 
-        janela.draw(estado->desenho);
+if (estado->sprite.has_value()) {
+            estado->sprite->setPosition(estado->desenho.getPosition());
+            janela.draw(*estado->sprite);
+        } else {
+            janela.draw(estado->desenho);
+        }
+
         atual = atual->proximo;
         numero++;
 }
@@ -972,11 +1026,11 @@ EstadoMonstroRPG* obterEstadoMonstroRPG(
     novoEstado->referencia = monstro;
 
     if (ehBoss) {
-        novoEstado->corpo.setSize(sf::Vector2f(34.0f, 34.0f));
+        novoEstado->corpo.setSize(sf::Vector2f(90.0f, 90.0f));
         novoEstado->corpo.setFillColor(sf::Color::Red);
         novoEstado->velocidade = 95.0f;
     } else {
-        novoEstado->corpo.setSize(sf::Vector2f(22.0f, 22.0f));
+        novoEstado->corpo.setSize(sf::Vector2f(40.0f, 40.0f));
         novoEstado->corpo.setFillColor(sf::Color(150, 50, 50));
         novoEstado->velocidade = 65.0f;
     }
@@ -1417,10 +1471,37 @@ mostrarTutorialRPG();
 
     Texture texBoss, texSkeleto, texSlimeAzul, texbat;
     definirSpriteMonstroRPG(sala1, texSkeleto, "img/native/monsters/skeleton.png");
-    definirSpriteMonstroRPG(sala2, texSlimeAzul, "img/native/monsters/slime_blue_1.png");
-    definirSpriteMonstroRPG(sala3, texbat, "img/native/monsters/bat_1.png");
-    definirSpriteMonstroRPG(boss, texBoss, "img/native/monsters/slime_red_1.png");
+    definirSpriteMonstroRPG(sala2, texSlimeAzul, "img/pixel art/slime.png");
+    definirSpriteMonstroRPG(sala3, texbat, "img/pixel art/morcego.png");
+    definirSpriteMonstroRPG(boss, texBoss, "img/pixel art/slimered.png");
 
+// ==================================================
+// PIXEL ART DO JOGADOR CONFIG- Marya
+// ==================================================
+Texture texturaJogador;
+if (!texturaJogador.loadFromFile("img/personagem.png")) { // <-- Coloque o caminho da sua imagem aqui
+    cout << "Erro ao carregar a imagem do personagem!\n";
+    return 1;
+}
+texturaJogador.setSmooth(false); // Mantem a pixel art nitida
+//Ajuste automático de tamanho
+Vector2u tamImg = texturaJogador.getSize();
+jogador.sprite.emplace(texturaJogador);
+jogador.sprite->setScale({
+    40.0f / static_cast<float>(tamImg.x),
+    40.0f / static_cast<float>(tamImg.y)
+});
+
+//==================================================
+// PIXEL ART ITENS CONFIG- Marya
+//==================================================
+Texture texPocao, texArmadura, texItemComum;
+
+if (texPocao.loadFromFile("img/pixel art/pocao.png")) texPocao.setSmooth(false);
+if (texArmadura.loadFromFile("img/pixel art/arm.png")) texArmadura.setSmooth(false);
+if (texItemComum.loadFromFile("img/pixel art/espada.png")) texItemComum.setSmooth(false);
+
+aplicarTexturasItensRPG(texPocao, texArmadura, texItemComum);
     // ----------------------------------------------
     // LOOP PRINCIPAL DA JANELA
     // ----------------------------------------------
@@ -1560,7 +1641,9 @@ teclaFAntes = teclaFAtual;
 
         // ------------------------------------------
         // PAREDE DIREITA
-        // ------------------------------------------
+        
+
+
 
         for (int linha = 0; linha < 8; linha++) {
 
@@ -1578,7 +1661,12 @@ desenharItensSalaRPG(janela, salaAtual);
 desenharMonstroSalaRPG(janela, salaAtual);
 
 // Desenha o jogador
-janela.draw(jogador.corpo);
+if (jogador.sprite.has_value()) {
+    jogador.sprite->setPosition(jogador.corpo.getPosition());
+    janela.draw(*jogador.sprite);
+} else {
+    janela.draw(jogador.corpo);
+}
 
 // Desenha as barras de vida e armadura
 desenharBarrasJogadorRPG(janela, jogador);
