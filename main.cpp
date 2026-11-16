@@ -1,7 +1,7 @@
-#include <SFML/Graphics.hpp>    
+#include <SFML/Graphics.hpp>  //inserção de imagens
 #include <iostream>
 #include <string>
-#include <clocale>
+#include <clocale> 
 #include <random> // numeros aleatorios para movimentacao
 #include <cmath> //distancia e movimento
 #include <algorithm> // min, max
@@ -46,7 +46,7 @@ struct Sala {
     bool ehBoss;
 };
 
-// Lista encadeada que registra todas as salas
+// Lista encadeada que registra todas as salas 
 struct NoSala {
     Sala* sala;
     NoSala* proximo;
@@ -70,14 +70,14 @@ Sala* criarSala(string nome) {
     novaSala->temChave = false;
     novaSala->ehBoss = false;
 
-    // Cria um no para registrar a sala
+    // Cria um no para registrar a sala. O nó é só um “crachá” que aponta para a sala.
     NoSala* novoNo = new NoSala;
-
     novoNo->sala = novaSala;
 
     // Insere o no no inicio da lista
-    novoNo->proximo = listaSalas;
-    listaSalas = novoNo;
+    novoNo->proximo = listaSalas; // a ficha nova aponta para quem era a primeira
+    listaSalas = novoNo;            // agora a primeira é a nova
+
 
     return novaSala;
 }

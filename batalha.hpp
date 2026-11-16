@@ -1,7 +1,6 @@
 // ============================================================================
 // batalha.hpp - TELA DE BATALHA (Isabely)
 // ============================================================================
-// Arquivo separado para nao mexer no codigo dos outros.
 // Estruturas: duas FILAS (FIFO) 
 //   - FilaTurnosRPG    : quem age (sai do inicio e volta para o fim)
 //   - FilaMensagensRPG : log de combate (mantem as 4 ultimas mensagens)
@@ -249,6 +248,10 @@ void passarTurnoRPG(BatalhaRPG& batalha) {
 
 // Verifica se alguem morreu e encerra a batalha se for o caso.
 void verificarFimBatalhaRPG(BatalhaRPG& batalha, const JogadorRPG& jogador) {
+
+    if (batalha.monstro == nullptr) {
+    return;
+}  //verificação prévia de segurança
     if (batalha.monstro->vida <= 0) {
         batalha.resultado = ResultadoBatalhaRPG::VITORIA;
         batalha.tempoFim = 1.6f;
@@ -439,10 +442,15 @@ void desenharTextoBatalhaRPG(
 }
 
 void desenharBatalhaRPG(
+    
     sf::RenderWindow& janela,
     const BatalhaRPG& batalha,
     const JogadorRPG& jogador
 ) {
+
+    if (batalha.monstro == nullptr) {
+    return; //verificação prévia de segurança 
+}
     // Fundo
     sf::RectangleShape fundo({512.0f, 256.0f});
     fundo.setFillColor(sf::Color(28, 22, 38));

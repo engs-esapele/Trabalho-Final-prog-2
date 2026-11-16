@@ -1,5 +1,5 @@
 // ============================================================================
-// bestiario.hpp - BESTIARIO DO JOGO (cobre R8 e R10 do checklist)
+// bestiario.hpp - BESTIARIO DO JOGO - Isabely
 // ============================================================================
 // O bestiario e o catalogo dos monstros do jogo. Aperte B no mapa para abrir
 // o menu no console:
@@ -12,13 +12,6 @@
 //   - ABB (arvore binaria de busca) indexada pelo NOME do monstro.
 //   - vector ordenado: copia dos dados usada pelas buscas.
 //
-// Por que usar uma ABB: a travessia in-ordem entrega os monstros ja em ordem
-// alfabetica, sem precisar de algoritmo de ordenacao (acesso ordenado aos
-// dados). O R9 (ordenacao) ja e coberto pelo Selection Sort do inventario
-// (ordenarInventarioRPG), entao nao ha outro algoritmo de ordenacao aqui.
-//
-// Incluir DEPOIS de batalha.hpp (precisa de Monstro, Sala, NoSala, listaSalas
-// e pressionouTeclaRPG, que ja existem acima).
 // ============================================================================
 #pragma once
 
