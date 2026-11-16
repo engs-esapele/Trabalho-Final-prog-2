@@ -378,10 +378,21 @@ void atualizarBatalhaRPG(
     mt19937& gerador
 ) {
     // Sempre le as teclas para manter o controle de "acabou de apertar".
+    //consegue agora ler as teclas 1 a 4 do teclado numerico e do teclado normal
+    bool p1 = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Numpad1);
+    bool p2 = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Numpad2);
+    bool p3 = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Numpad3);
+    bool p4 = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num4) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Numpad4);
+
     bool k1 = pressionouTeclaRPG(sf::Keyboard::Key::Num1, batalha.tecla1);
     bool k2 = pressionouTeclaRPG(sf::Keyboard::Key::Num2, batalha.tecla2);
     bool k3 = pressionouTeclaRPG(sf::Keyboard::Key::Num3, batalha.tecla3);
     bool k4 = pressionouTeclaRPG(sf::Keyboard::Key::Num4, batalha.tecla4);
+
+    batalha.tecla1 = p1;
+    batalha.tecla2 = p2;
+    batalha.tecla3 = p3;
+    batalha.tecla4 = p4;
 
     // Batalha acabou: so espera o tempo de exibir o resultado.
     if (batalha.resultado != ResultadoBatalhaRPG::NENHUM) {
