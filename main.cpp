@@ -157,7 +157,6 @@ bool moverJogador(Sala*& atual, int& chaves) {
     cout << "Escolha um caminho: ";
 
     if (!(cin >> escolha)) {
-
         cin.clear();
         cin.ignore(10000, '\n');
 
@@ -1621,6 +1620,7 @@ jogador.sprite->setScale({
     40.0f / static_cast<float>(tamImg.y)
 });
 
+jogador.corpo.setSize({40.0f, 40.0f}); // hitbox igual ao tamanho da imagem
 //==================================================
 // PIXEL ART ITENS CONFIG- Marya
 //==================================================
@@ -1648,9 +1648,18 @@ aplicarTexturasItensRPG(texPocao, texArmadura, texItemComum);
         // Limpa a janela
         janela.clear(Color::Black);
 
+                // Pausa quando a janela nao esta em foco (evita ler teclas digitadas no console)
+        if (!janela.hasFocus()) {
+            relogio.restart(); // reinicia o relógio enquanto o jogo está sem foco, descartando o tempo da pausa.
+            sf::sleep(sf::milliseconds(50)); //espera 50 ms para reduzir o uso da CPU.
+            continue; // pula o restante do loop, evitando atualizar o jogo enquanto o console ou outra janela está em foco.
+        }
+
         //emily//
 // Calcula o tempo entre os quadros
 float dt = relogio.restart().asSeconds();
+
+if (dt > 0.05f) dt = 0.05f; // Verifica se dt ficou maior que 0,05 segundo. se icou, reduz para 0,05 evita que o personagem ou monstro percorra uma distância enorme depois de uma pausa ou travamento.
 
 if (processarBatalhaRPG(jogador, salaAtual, dt, gerador, janela, chavesColetadas)) continue;
 

@@ -387,13 +387,6 @@ void abrirBestiarioRPG() {
             opcao = -1;
             continue;
         }
-        if (!(cin >> opcao)) {
-            cin.clear();
-            cin.ignore(10000, '\n');
-            cout << "Entrada invalida!\n";
-            opcao = -1;
-            continue;
-        }
         cin.ignore(10000, '\n'); // limpa qualquer sobra na linha apos ler o numero
 
         if (opcao == 0) {
