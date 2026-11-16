@@ -1,0 +1,88 @@
+RELATORIO TECNICO - MEU RPG (C++ / SFML)
+=========================================
+
+1. VISAO GERAL
+--------------
+O projeto e um RPG de exploracao de masmorra. O jogador percorre salas ligadas
+por um mapa, coleta itens, enfrenta monstros em batalhas por turnos, junta tres
+chaves e derrota o Boss. Todas as estruturas de dados foram implementadas
+manualmente com ponteiros, new e delete, sem usar containers da STL no nucleo
+do jogo (o vector so aparece nas buscas do bestiario).
+
+2. ESTRUTURAS DE DADOS ESCOLHIDAS E MOTIVOS
+-------------------------------------------
+Lista encadeada (R5): usada em salas, saidas, itens da sala, inventario e
+recompensas. Esses conjuntos mudam o tempo todo (item coletado, item que cai,
+sala nova) e nao tem tamanho conhecido. A lista cresce e diminui sem copiar
+dados, e inserir no inicio custa O(1). O custo e a busca, O(n), aceitavel
+porque as listas sao pequenas.
+
+Grafo com lista de adjacencia (mapa): cada Sala guarda uma lista de Saidas que
+apontam para as salas vizinhas. O mapa tem poucas conexoes, entao a lista de
+adjacencia gasta menos memoria que uma matriz e e simples de percorrer para
+montar o menu. Uma lista a parte (listaSalas) registra todas as salas, pois o
+grafo tem ciclos e apagar a partir da entrada visitaria salas repetidas.
+
+Pilha (R6): as pocoes ficam em uma pilha. A regra do jogo e "a ultima pocao
+coletada e a primeira usada", que e exatamente LIFO. Push e pop custam O(1).
+
+Fila (R7): a batalha usa duas filas. A fila de turnos define quem age: quem
+age sai do inicio e volta para o fim, alternando jogador e monstro (FIFO). A
+fila de mensagens guarda as ultimas 4 linhas do combate; a mais antiga sai
+quando entra uma nova. Mantemos ponteiros de inicio e fim para que enfileirar
+e desenfileirar custem O(1).
+
+Arvore binaria de busca (R8): o bestiario guarda os monstros em uma ABB
+indexada pelo nome. A travessia in-ordem entrega os monstros em ordem
+alfabetica sem precisar ordenar de novo, o que justifica a estrutura (acesso
+ordenado aos dados). Insercao e busca custam O(log n) em media e O(n) no pior
+caso (arvore degenerada). Nomes repetidos sao ignorados.
+
+Recursividade (R3): usada onde a estrutura e naturalmente recursiva: busca e
+exibicao de itens no inventario e todas as operacoes da ABB.
+
+3. ALGORITMO DE ORDENACAO E COMPLEXIDADE (R9)
+---------------------------------------------
+Foi implementado o Selection Sort em ordenarInventarioRPG, que organiza o
+inventario (lista encadeada) em ordem alfabetica. A cada passo procura o menor
+nome entre os nos restantes e troca o conteudo com o no atual.
+
+ - Comparacoes: sempre n(n-1)/2, portanto O(n^2) no melhor, medio e pior caso.
+ - Trocas: no maximo n-1, portanto O(n).
+ - Espaco extra: O(1), pois ordena no proprio inventario.
+ - Nao e estavel.
+
+Escolhemos o Selection Sort porque o inventario e pequeno, o algoritmo e simples
+de implementar sobre lista encadeada e faz poucas trocas. Para volumes grandes
+seria preferivel Merge Sort, O(n log n).
+
+4. BUSCAS (R10)
+---------------
+Foram implementadas a busca sequencial, O(n), e a busca binaria, O(log n), sobre
+um vetor ordenado por nome. A binaria exige dados ordenados e acesso por
+indice, por isso nao se aplica a lista encadeada. A demonstracao compara as
+duas com contagem de comparacoes e tempo medido com std::chrono, repetindo a
+busca varias vezes para o tempo ser mensuravel.
+
+5. GERENCIAMENTO DE MEMORIA
+---------------------------
+Todo no e criado com new e liberado com delete. Cada estrutura tem sua funcao
+de liberacao:
+
+ - liberarMapa: percorre listaSalas e apaga saidas, monstro, itens, sala e no
+   de lista. Guarda o ponteiro proximo antes de cada delete.
+ - liberarModuloJogadorRPG: apaga inventario, pilha de pocoes e os estados
+   visuais de itens e monstros.
+ - Remocoes durante o jogo: removerItemDaSalaRPG (item coletado ou recusado),
+   removerUmItemInventarioRPG e usarPocaoRPG apagam o no na hora.
+ - Batalha: limparBatalhaRPG apaga as duas filas ao fim de cada batalha.
+ - Recompensas: cada no e apagado quando entregue; o restante e liberado ao
+   fechar o programa.
+ - Bestiario: a ABB e apagada em pos-ordem (filhos antes do pai) ao fechar.
+
+Estruturas globais com estado (batalha, recompensas e bestiario) usam um objeto
+guarda cujo destrutor libera os nos automaticamente no fim do programa, assim a
+funcao main nao precisa lembrar de chamar a liberacao.
+
+O ponteiro do monstro guardado no bestiario apenas referencia o monstro do mapa;
+quem o apaga e liberarMapa, evitando delete duplo.
