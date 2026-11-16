@@ -313,7 +313,8 @@ struct JogadorRPG{
     NoPocaoRPG* topoPocoes = nullptr;
     int quantidadePocoes = 0;
     int itensRecusados=0;
-
+    int chavesRegistradas = 0;
+    
 // Controle das teclas
     bool inventarioAberto = false;
     bool teclaIAnterior = false;
@@ -321,8 +322,6 @@ struct JogadorRPG{
     bool teclaQAnterior = false;
     bool teclaHAnterior = false;
     bool teclaEspacoAnterior = false;
-
-    int chavesRegistradas = 0;
 
     JogadorRPG() {
         corpo.setSize({18.0f, 24.0f});
