@@ -10,12 +10,13 @@
 using namespace std;
 using namespace sf;
 
+// Representa um item lógico armazenado na lista encadeada de uma sala -Marya
 struct Item {
     string nome;
     int atributo; 
     Item* proximo;
 };
-
+// Cria um novo item dinamicamente e o insere no início da lista de itens da sala
 struct Monstro {
     string nome;
     int vida;
@@ -593,7 +594,7 @@ void configurarSpriteItemRPG(EstadoItemRPG* estado, const sf::Texture& textura) 
     // original de cada eixo.
     });
 }
-
+// Ponteiros globais que guardam as texturas padrão de cada categoria de item-marya
 const sf::Texture* texPocaoGlobal = nullptr;
 const sf::Texture* texArmaduraGlobal = nullptr;
 const sf::Texture* texComumGlobal = nullptr;
