@@ -1813,7 +1813,7 @@ desenharBarrasJogadorRPG(janela, jogador);
 
         // Exibe tudo o que foi desenhado
         janela.display();
-    }
+}
     // Libera a memoria da parte do jogador
     liberarModuloJogadorRPG(jogador);
 
@@ -1822,3 +1822,4 @@ desenharBarrasJogadorRPG(janela, jogador);
 
     return 0;
 }
+
