@@ -10,17 +10,19 @@
 using namespace std;
 using namespace sf;
 
-// Representa um item lógico armazenado na lista encadeada de uma sala -Marya
+//MARYA- R5(LISTA ENCADEADA )
+// Representa um item lógico armazenado na lista encadeada de uma sala 
 struct Item {
     string nome;
     int atributo; 
-    Item* proximo;
+    Item* proximo; //GUARDA O PONTEIRO PARA O PROXIMO ITEM NA LISTA
 };
 // Cria um novo item dinamicamente e o insere no início da lista de itens da sala
-struct Monstro {
+struct Monstro { //MONSTRO É UM DADO PURO SEM PONTEIRO PARA OUTRO MONSTRO 
     string nome;
     int vida;
     int ataque;
+    //A IDEIA CENTRAL É SEPARA O QUE É DADO PURO (MONSTRO) DO QUE É ESTADO (BATALHA)
 };
 // ==================================================
 // 1. ESTRUTURAS DO MAPA
@@ -105,17 +107,17 @@ void conectar(Sala* a, Sala* b) {
     saidaBA->proxima = b->saidas;
     b->saidas = saidaBA;
 }
-///adcionando itens e monstros nas salas
+///adcionando itens e monstros nas salas - MARYA 
 void adicionarItem(Sala* sala, string nome, int atributo) {
-    Item* novoItem = new Item;
+    Item* novoItem = new Item; //alocação dinâmica de memória (R4)
     novoItem->nome = nome;
-    novoItem->atributo = atributo;
-    novoItem->proximo = sala->itens;
-    sala->itens = novoItem;
+    novoItem->atributo = atributo; //O NOVO APONTA PARA O ANTIGO PRIMEIRO
+    novoItem->proximo = sala->itens; // E O NOVO PASSA A SER O PRIMEIRO
+    sala->itens = novoItem; //GUARDA O PONTEIRO PARA O NOVO ITEM NA SALA
 }
 
 void adicionarMonstro(Sala* sala, string nome, int vida, int ataque) {
-    Monstro* novoMonstro = new Monstro;
+    Monstro* novoMonstro = new Monstro; //alocação dinâmica de memória (R4)
     novoMonstro->nome = nome;
     novoMonstro->vida = vida;
     novoMonstro->ataque = ataque;
@@ -541,7 +543,7 @@ void usarPocaoRPG(JogadorRPG& jogador) {
 }
 
 // ============================================================
-// 4. ITENS NO CHAO: POSICAO, COLETA E RECUSA
+// 4. ITENS NO CHAO: POSICAO, COLETA E RECUSA - MARYA
 // ============================================================
 
 // Como a estrutura Item do grupo nao possui posicao,
@@ -551,12 +553,12 @@ void usarPocaoRPG(JogadorRPG& jogador) {
 // sprite = imagem opcional (pixel art) usada no lugar do circulo, se houver textura
 // efeito = o que o item faz ao ser coletado | avisoMostrado = evita repetir a mensagem "item proximo"
 struct EstadoItemRPG {
-    Item* referencia;
-    sf::CircleShape desenho;
+    Item* referencia; //QUAL ITEM DO MAPA ESTE ESTADO REPRESENTA
+    sf::CircleShape desenho; //A REPRESENTAÇÃO PADRÃO DO ITEM (só é usado se não houver sprite)
     optional<sf::Sprite> sprite; //para colocar a foto do item
-    EfeitoItemRPG efeito;
+    EfeitoItemRPG efeito; //poção, armadura ou comum
     bool avisoMostrado;
-    EstadoItemRPG* proximo;
+    EstadoItemRPG* proximo;//lista global de estados 
 };
 
 // Cabeca da lista encadeada global com o estado visual de todos os itens
@@ -584,6 +586,7 @@ EfeitoItemRPG identificarEfeitoItemRPG(const std::string& nome) {
 //   estado  - estado do item que vai receber o sprite (se for nullptr, nao faz nada)
 //   textura - textura (imagem) a aplicar no sprite
 // Retorno: nenhum
+//MARYA - R6 (SPRITE PARA ITENS)
 void configurarSpriteItemRPG(EstadoItemRPG* estado, const sf::Texture& textura) {
     if (estado == nullptr) return;
     estado->sprite.emplace(textura);
@@ -1079,22 +1082,22 @@ bool atualizarMovimentoJogadorRPG(
 }
 
 // ============================================================
-// 6. MOVIMENTACAO DOS MONSTROS E COMBATE
+// 6. MOVIMENTACAO DOS MONSTROS E COMBATE -MARYA R2 E R5
 // ============================================================
 
 // Guarda a posicao e o desenho de cada monstro.
 struct EstadoMonstroRPG {
-    Monstro* referencia;
+    Monstro* referencia; //R2 PONTEIRO PARA O MONSTRO DO MAPA
     sf::RectangleShape corpo;
     sf::Vector2f direcao;
-    float tempoParaNovaDirecao;
-    float velocidade;
-    EstadoMonstroRPG* proximo;
+    float tempoParaNovaDirecao; 
+    float velocidade; //PIXELS POR SEGUNDO DO MONSTRO
+    EstadoMonstroRPG* proximo; // R5 NÓ DA LISTA ENCADEADA GLOBAL DE MONSTROS 
 };
 
 // Cabeca da lista encadeada global com o estado de todos os monstros
 // ja vistos em qualquer sala.
-EstadoMonstroRPG* estadosMonstrosRPG = nullptr;
+EstadoMonstroRPG* estadosMonstrosRPG = nullptr;//INICIO DA LISTA
 
 // Procura o estado visual do monstro ou cria um novo.
 // referencia = monstro do mapa a que este estado pertence
@@ -1102,19 +1105,19 @@ EstadoMonstroRPG* estadosMonstrosRPG = nullptr;
 // de movimento | tempoParaNovaDirecao = contagem regressiva para sortear
 // uma nova direcao | velocidade = pixels por segundo do monstro
 EstadoMonstroRPG* obterEstadoMonstroRPG(
-    Monstro* monstro,
+    Monstro* monstro,  
     bool ehBoss
 ) {
-    EstadoMonstroRPG* atual = estadosMonstrosRPG;
+    EstadoMonstroRPG* atual = estadosMonstrosRPG; //R2 PONTEIRO DE PERCURSO NA LISTA DE MONSTROS
 
-    while (atual != nullptr) {
+    while (atual != nullptr) { //TRAVESSIA DA LISTA PARA VERIFICAR SE O MONSTRO JA EXISTE
         if (atual->referencia == monstro) {
             return atual;
         }
 
         atual = atual->proximo;
     }
-    EstadoMonstroRPG* novoEstado = new EstadoMonstroRPG;
+    EstadoMonstroRPG* novoEstado = new EstadoMonstroRPG; // R4:ALOCAÇÃO DINAMICA DE MEMORIA 
 
     novoEstado->referencia = monstro;
 
@@ -1129,7 +1132,7 @@ EstadoMonstroRPG* obterEstadoMonstroRPG(
         novoEstado->velocidade = 65.0f;
     }
 
-    novoEstado->corpo.setPosition(sf::Vector2f(350.0f, 105.0f));
+    novoEstado->corpo.setPosition(sf::Vector2f(350.0f, 105.0f)); //R5 POSIÇÃO INICIAL DO MONSTRO NA SALA
     novoEstado->direcao = sf::Vector2f(1.0f, 0.0f);
     novoEstado->tempoParaNovaDirecao = 0.0f;
 
@@ -1138,26 +1141,28 @@ EstadoMonstroRPG* obterEstadoMonstroRPG(
 
     return novoEstado;
 }
-
-// Faz o monstro andar e mudar de direcao aleatoriamente.
+// -------------------------------------------------------------
+//                     MARYA MOVIMENTACAO DOS MONSTROS
+//-------------------------------------------------------------
+// O MONSTRO ANDA EM UMA DIREÇÃO DE TEMPOS EM TEMPOS SORTEIA OUTRA.
 // Parametros:
 //   monstro - estado do monstro a movimentar
 //   tempo   - tempo decorrido desde o ultimo quadro
 //   gerador - gerador de numeros aleatorios usado para sortear a direcao
 // Retorno: nenhum
 void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerador) {
-    monstro.tempoParaNovaDirecao -= tempo;
+    monstro.tempoParaNovaDirecao -= tempo; //TEMPORIZADOR
 
     // Escolhe uma nova direcao aleatoria (x e y entre -1, 0 e 1; se os
     // dois sairem 0, forca x=1 para o monstro nao ficar parado).
     if (monstro.tempoParaNovaDirecao <= 0) {
-        uniform_int_distribution<int> distribuicao(-1, 1);
+        uniform_int_distribution<int> distribuicao(-1, 1); //SORTEIA A DIREÇÃO
 
         int x = distribuicao(gerador);
         int y = distribuicao(gerador);
 
         if (x == 0 && y == 0) {
-            x = 1;
+            x = 1; //EVITA FICAR PARADO
         }
 
          // Normaliza o vetor (x, y) para que a velocidade na diagonal
@@ -1175,7 +1180,7 @@ void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerado
     sf::Vector2f posicao = monstro.corpo.getPosition();
     sf::Vector2f tamanhoMonstro = monstro.corpo.getSize();
 
-    posicao.x += monstro.direcao.x * monstro.velocidade * tempo;
+    posicao.x += monstro.direcao.x * monstro.velocidade * tempo; //FORMULA DO DESLOCAMENTO
     posicao.y += monstro.direcao.y * monstro.velocidade * tempo;
 
     // Impede que o monstro atravesse as paredes; ao bater, inverte a
@@ -1204,9 +1209,12 @@ void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerado
         }
     }
 
-    monstro.corpo.setPosition(posicao);
+    monstro.corpo.setPosition(posicao); 
 }
 
+// ============================================================
+// 7. COMBATE E COLISAO ENTRE JOGADOR E MONSTRO - MARYA
+// ============================================================
 
 // Verifica se dois retangulos estao encostando (colisao AABB: Axis-Aligned
 // Bounding Box, ou seja, retangulos alinhados aos eixos x/y).
@@ -1214,6 +1222,7 @@ void movimentarMonstroRPG(EstadoMonstroRPG& monstro,float tempo, mt19937& gerado
 //   primeiro - primeiro retangulo
 //   segundo  - segundo retangulo
 // Retorno: true se os retangulos estiverem encostando/sobrepostos
+
 bool detectarColisaoAABBRPG(
     const sf::RectangleShape& primeiro,
     const sf::RectangleShape& segundo
@@ -1237,6 +1246,9 @@ bool detectarColisaoAABBRPG(
 }
 
 // Aplica o dano primeiro na armadura e depois na vida.
+//=============================================================
+// DANO NO JOGADOR - MARYA
+//=============================================================
 void receberDanoJogadorRPG(JogadorRPG& jogador, int dano) {
 
     // Ignora o dano se o jogador ja estiver morto ou ainda estiver no
@@ -1269,6 +1281,10 @@ void receberDanoJogadorRPG(JogadorRPG& jogador, int dano) {
 // Atualiza o monstro, verifica ataques e verifica colisao.
 //   jogadorAtacou - true se o jogador acabou de atacar neste quadro
 //   gerador       - gerador de numeros aleatorios (usado na movimentacao do monstro)
+
+// ===========================================================
+//COMBATE ENTRE JOGADOR E MONSTRO-MARYA
+// ===========================================================
 void atualizarCombateSalaRPG(JogadorRPG& jogador,Sala* sala,float tempo,bool jogadorAtacou,mt19937& gerador) 
 {
     // O parametro gerador e mantido para continuar compativel
